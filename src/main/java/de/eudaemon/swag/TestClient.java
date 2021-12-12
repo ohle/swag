@@ -30,6 +30,15 @@ public class TestClient {
                                         + componentInfo.getPlacementInfo(id));
                         System.out.println(
                                 "componentInfo.getSize(is) = " + componentInfo.getSizeInfos(id));
+                        int parent = componentInfo.getParent(id);
+                        System.out.println("componentInfo.getParent(id) = " + parent);
+                        System.out.println(
+                                "componentInfo.getPlacementInfo(parent) = "
+                                        + componentInfo.getPlacementInfo(parent));
+                        System.out.println(
+                                "componentInfo.getChildren(p) = "
+                                        + componentInfo.getChildren(parent));
+
                     } catch (Throwable t) {
                         System.out.println(t.getMessage());
                         t.printStackTrace();

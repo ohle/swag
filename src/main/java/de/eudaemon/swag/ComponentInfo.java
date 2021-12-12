@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -21,7 +20,7 @@ import javax.swing.SwingUtilities;
 
 public class ComponentInfo extends NotificationBroadcasterSupport implements ComponentInfoMBean {
 
-    private final Map<Component, StackTraceElement[]> additionTraces;
+    private final Map<Component, PlacementInfo> additionTraces;
     private final Map<Integer, Component> taggedComponents = new HashMap<>();
 
     public ComponentInfo() {
@@ -30,13 +29,13 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
-    public StackTraceElement[] getStackTrace(int hashCode) {
+    public PlacementInfo getPlacementInfo(int hashCode) {
         return additionTraces.get(taggedComponents.get(hashCode));
     }
 
     @Override
-    public Dimension getSize(int hashCode) {
-        return taggedComponents.get(hashCode).getSize();
+    public SizeInfos getSizeInfos(int hashCode) {
+        return SizeInfos.forComponent(taggedComponents.get(hashCode));
     }
 
     private void installHotkeyListener() {
@@ -45,8 +44,10 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                         e -> {
                             if (e.getKeyCode() == KeyEvent.VK_F12
                                     && e.getID() == KeyEvent.KEY_RELEASED) {
+                                System.out.println("ComponentInfo.installHotkeyListener");
                                 Notification notification = createComponentUnderMouseNotification();
                                 sendNotification(notification);
+                                System.out.println("ComponentInfo.installHotkeyListener 2");
                                 return true;
                             } else {
                                 return false;

@@ -23,12 +23,17 @@ public class TestClient {
                         connection, objectName, ComponentInfoMBean.class, true);
         componentInfo.addNotificationListener(
                 (notification, handback) -> {
-                    int id = (int) notification.getUserData();
-                    StackTraceElement[] stackTrace = componentInfo.getStackTrace(id);
-                    for (StackTraceElement stackTraceElement : stackTrace) {
-                        System.out.println(stackTraceElement);
+                    try {
+                        int id = (int) notification.getUserData();
+                        System.out.println(
+                                "componentInfo.getPlacementInfo(id) = "
+                                        + componentInfo.getPlacementInfo(id));
+                        System.out.println(
+                                "componentInfo.getSize(is) = " + componentInfo.getSizeInfos(id));
+                    } catch (Throwable t) {
+                        System.out.println(t.getMessage());
+                        t.printStackTrace();
                     }
-                    System.out.println("componentInfo.getSize(is) = " + componentInfo.getSize(id));
                 },
                 null,
                 null);

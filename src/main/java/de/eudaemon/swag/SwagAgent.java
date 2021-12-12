@@ -29,16 +29,14 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 
 public class SwagAgent {
-    public static final Map<Component, StackTraceElement[]> additionTraces = new HashMap<>();
+    public static final Map<Component, PlacementInfo> additionTraces = new HashMap<>();
 
     public static class ToStringAdvice {
         @Advice.OnMethodEnter
         public static void before(@Advice.AllArguments Object[] args, @Advice.This Container thiz) {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-            System.out.println("ToStringAdvice.before");
-            System.out.println("Adding trace:");
-            System.out.println(stackTrace[0]);
-            additionTraces.put((Component) args[0], stackTrace);
+            additionTraces.put(
+                    (Component) args[0], new PlacementInfo(args[1], (Integer) args[2], stackTrace));
         }
     }
 

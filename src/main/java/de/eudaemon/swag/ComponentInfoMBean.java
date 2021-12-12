@@ -1,11 +1,9 @@
 package de.eudaemon.swag;
 
-import java.awt.Dimension;
-
 import javax.management.NotificationEmitter;
 
 public interface ComponentInfoMBean extends NotificationEmitter {
-    StackTraceElement[] getStackTrace(int hashCode);
+    PlacementInfo getPlacementInfo(int hashCode);
 
-    Dimension getSize(int hashCode);
+    SizeInfos getSizeInfos(int hashCode);
 }

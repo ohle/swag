@@ -21,8 +21,17 @@ public class TestClient {
         ComponentInfoMBean componentInfo =
                 MBeanServerInvocationHandler.newProxyInstance(
                         connection, objectName, ComponentInfoMBean.class, true);
-        for (StackTraceElement stackTraceElement : componentInfo.getStackTrace()) {
-            System.out.println(stackTraceElement);
-        }
+        componentInfo.addNotificationListener(
+                (notification, handback) -> {
+                    StackTraceElement[] stackTrace =
+                            componentInfo.getStackTrace((Integer) notification.getUserData());
+                    for (StackTraceElement stackTraceElement : stackTrace) {
+                        System.out.println(stackTraceElement);
+                    }
+                },
+                null,
+                null);
+        while (true)
+            ;
     }
 }

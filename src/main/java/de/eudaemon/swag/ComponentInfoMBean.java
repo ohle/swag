@@ -1,5 +1,7 @@
 package de.eudaemon.swag;
 
-public interface ComponentInfoMBean {
-    StackTraceElement[] getStackTrace();
+import javax.management.NotificationEmitter;
+
+public interface ComponentInfoMBean extends NotificationEmitter {
+    StackTraceElement[] getStackTrace(int hashCode);
 }

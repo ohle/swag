@@ -11,6 +11,7 @@ import java.util.jar.JarFile;
 
 import java.io.IOException;
 
+import java.awt.Component;
 import java.awt.Container;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -28,7 +29,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 
 public class SwagAgent {
-    public static final Map<Integer, StackTraceElement[]> additionTraces = new HashMap<>();
+    public static final Map<Component, StackTraceElement[]> additionTraces = new HashMap<>();
 
     public static class ToStringAdvice {
         @Advice.OnMethodEnter
@@ -37,7 +38,7 @@ public class SwagAgent {
             System.out.println("ToStringAdvice.before");
             System.out.println("Adding trace:");
             System.out.println(stackTrace[0]);
-            additionTraces.put(args[0].hashCode(), stackTrace);
+            additionTraces.put((Component) args[0], stackTrace);
         }
     }
 

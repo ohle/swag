@@ -1,10 +1,12 @@
 package de.eudaemon.swag;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.KeyboardFocusManager;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -19,7 +21,8 @@ import javax.swing.SwingUtilities;
 
 public class ComponentInfo extends NotificationBroadcasterSupport implements ComponentInfoMBean {
 
-    private final Map<Integer, StackTraceElement[]> additionTraces;
+    private final Map<Component, StackTraceElement[]> additionTraces;
+    private final Map<Integer, Component> taggedComponents = new HashMap<>();
 
     public ComponentInfo() {
         additionTraces = SwagAgent.additionTraces;
@@ -28,7 +31,12 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
 
     @Override
     public StackTraceElement[] getStackTrace(int hashCode) {
-        return additionTraces.get(hashCode);
+        return additionTraces.get(taggedComponents.get(hashCode));
+    }
+
+    @Override
+    public Dimension getSize(int hashCode) {
+        return taggedComponents.get(hashCode).getSize();
     }
 
     private void installHotkeyListener() {
@@ -37,15 +45,23 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                         e -> {
                             if (e.getKeyCode() == KeyEvent.VK_F12
                                     && e.getID() == KeyEvent.KEY_RELEASED) {
-                                Notification notification =
-                                        new Notification("Hotkey", ComponentInfo.this, 1);
-                                notification.setUserData(getComponentUnderMouse().hashCode());
+                                Notification notification = createComponentUnderMouseNotification();
                                 sendNotification(notification);
                                 return true;
                             } else {
                                 return false;
                             }
                         });
+    }
+
+    private Notification createComponentUnderMouseNotification() {
+        Notification notification = new Notification("Hotkey", ComponentInfo.this, 1);
+        Optional<Component> component = getComponentUnderMouse();
+        if (component.isPresent()) {
+            taggedComponents.put(component.get().hashCode(), component.get());
+            notification.setUserData(component.hashCode());
+        }
+        return notification;
     }
 
     private Optional<Component> getComponentUnderMouse() {

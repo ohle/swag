@@ -79,10 +79,8 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                         e -> {
                             if (e.getKeyCode() == KeyEvent.VK_F12
                                     && e.getID() == KeyEvent.KEY_RELEASED) {
-                                System.out.println("ComponentInfo.installHotkeyListener");
                                 Notification notification = createComponentUnderMouseNotification();
                                 sendNotification(notification);
-                                System.out.println("ComponentInfo.installHotkeyListener 2");
                                 return true;
                             } else {
                                 return false;

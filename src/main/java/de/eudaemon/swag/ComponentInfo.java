@@ -35,6 +35,13 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
+    public ComponentDescription getDescription(int hashCode) {
+        return Optional.ofNullable(taggedComponents.get(hashCode))
+                .map(ComponentDescription::forComponent)
+                .orElse(null);
+    }
+
+    @Override
     public PlacementInfo getPlacementInfo(int hashCode) {
         return Optional.ofNullable(taggedComponents.get(hashCode))
                 .flatMap(c -> Optional.ofNullable(additionTraces.get(c)))

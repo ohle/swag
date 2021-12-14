@@ -19,6 +19,9 @@ import java.awt.Window;
 
 import java.awt.event.KeyEvent;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
@@ -74,6 +77,19 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                 .peek(this::tag)
                 .map(Objects::hashCode)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public RenderedImage getSnapshot(int hashCode) {
+        if (!taggedComponents.containsKey(hashCode)) {
+            return null;
+        }
+        Component component = taggedComponents.get(hashCode);
+        BufferedImage image =
+                new BufferedImage(
+                        component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
+        component.paint(image.createGraphics());
+        return image;
     }
 
     private void tag(Component component) {

@@ -2,8 +2,6 @@ package de.eudaemon.swag;
 
 import java.util.Collection;
 
-import java.awt.image.RenderedImage;
-
 import javax.management.NotificationEmitter;
 
 public interface ComponentInfoMBean extends NotificationEmitter {
@@ -17,5 +15,5 @@ public interface ComponentInfoMBean extends NotificationEmitter {
 
     Collection<Integer> getChildren(int hashCode);
 
-    RenderedImage getSnapshot(int hashCode);
+    SerializableImage getSnapshot(int hashCode);
 }

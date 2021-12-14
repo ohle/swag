@@ -20,7 +20,6 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
@@ -80,7 +79,7 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
-    public RenderedImage getSnapshot(int hashCode) {
+    public SerializableImage getSnapshot(int hashCode) {
         if (!taggedComponents.containsKey(hashCode)) {
             return null;
         }
@@ -89,7 +88,7 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                 new BufferedImage(
                         component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
         component.paint(image.createGraphics());
-        return image;
+        return new SerializableImage(image);
     }
 
     private void tag(Component component) {

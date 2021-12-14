@@ -14,11 +14,15 @@ import java.io.IOException;
 import java.awt.Component;
 import java.awt.Container;
 
+import java.awt.event.KeyEvent;
+
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+
+import javax.swing.KeyStroke;
 
 import static net.bytebuddy.agent.builder.AgentBuilder.RedefinitionStrategy.RETRANSFORMATION;
 import static net.bytebuddy.matcher.ElementMatchers.is;
@@ -40,10 +44,11 @@ public class SwagAgent {
         }
     }
 
-    public static void premain(String options, Instrumentation inst)
+    public static void premain(String optionsString, Instrumentation inst)
             throws UnmodifiableClassException, MalformedObjectNameException,
                     NotCompliantMBeanException, InstanceAlreadyExistsException,
                     MBeanRegistrationException, IOException {
+        Options options = Options.parse(optionsString);
         new AgentBuilder.Default()
                 .disableClassFormatChanges()
                 .with(RETRANSFORMATION)
@@ -53,10 +58,47 @@ public class SwagAgent {
                         (builder, typeDescription, classLoader, module) ->
                                 builder.visit(Advice.to(ToStringAdvice.class).on(named("addImpl"))))
                 .installOn(inst);
-        inst.appendToBootstrapClassLoaderSearch(new JarFile(options));
+        inst.appendToBootstrapClassLoaderSearch(options.agentJar);
         inst.retransformClasses(Container.class);
-        ComponentInfo componentInfoMBean = new ComponentInfo();
+        ComponentInfo componentInfoMBean =
+                new ComponentInfo(KeyStroke.getKeyStroke(options.keyCode, options.modifiers));
         ObjectName objectName = new ObjectName("de.eudaemon.swag:type=ComponentInfo");
         ManagementFactory.getPlatformMBeanServer().registerMBean(componentInfoMBean, objectName);
+    }
+
+    private static class Options {
+        final JarFile agentJar;
+        final int keyCode;
+        final int modifiers;
+
+        private Options(JarFile agentJar_, int keyCode_, int modifiers_) {
+            agentJar = agentJar_;
+            keyCode = keyCode_;
+            modifiers = modifiers_;
+        }
+
+        static Options parse(String optLine) throws IOException {
+            String[] options = optLine.split(",");
+            JarFile jarFile = null;
+            int keyCode = KeyEvent.VK_F12;
+            int modifiers = 0;
+
+            for (String option : options) {
+                String[] keyAndValue = option.split(":");
+                if ("agentJar".equals(keyAndValue[0])) {
+                    jarFile = new JarFile(keyAndValue[1]);
+                } else if ("keyCode".equals(keyAndValue[0])) {
+                    keyCode = Integer.parseInt(keyAndValue[1]);
+                } else if ("modifiers".equals(keyAndValue[0])) {
+                    modifiers = Integer.parseInt(keyAndValue[1]);
+                } else {
+                    throw new IllegalArgumentException("Unknown option: " + keyAndValue[0]);
+                }
+            }
+            if (jarFile == null) {
+                throw new IllegalArgumentException("Missing jarFile option");
+            }
+            return new Options(jarFile, keyCode, modifiers);
+        }
     }
 }

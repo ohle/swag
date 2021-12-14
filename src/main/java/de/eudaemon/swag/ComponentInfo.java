@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import javax.management.Notification;
 import javax.management.NotificationBroadcasterSupport;
 
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 public class ComponentInfo extends NotificationBroadcasterSupport implements ComponentInfoMBean {
@@ -31,9 +32,9 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     private final Map<Component, PlacementInfo> additionTraces;
     private final Map<Integer, Component> taggedComponents = new HashMap<>();
 
-    public ComponentInfo() {
+    public ComponentInfo(KeyStroke keyStroke) {
         additionTraces = SwagAgent.additionTraces;
-        installHotkeyListener();
+        installHotkeyListener(keyStroke);
     }
 
     @Override
@@ -95,11 +96,12 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
         taggedComponents.put(component.hashCode(), component);
     }
 
-    private void installHotkeyListener() {
+    private void installHotkeyListener(KeyStroke keyStroke) {
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
                 .addKeyEventDispatcher(
                         e -> {
-                            if (e.getKeyCode() == KeyEvent.VK_F12
+                            if (e.getKeyCode() == keyStroke.getKeyCode()
+                                    && (e.getModifiersEx() & keyStroke.getModifiers()) > 0
                                     && e.getID() == KeyEvent.KEY_RELEASED) {
                                 Notification notification = createComponentUnderMouseNotification();
                                 sendNotification(notification);

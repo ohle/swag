@@ -100,8 +100,12 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
         KeyboardFocusManager.getCurrentKeyboardFocusManager()
                 .addKeyEventDispatcher(
                         e -> {
+                            boolean modifiersMatch =
+                                    ((e.getModifiersEx() & keyStroke.getModifiers()) > 0)
+                                            || (e.getModifiers() == 0
+                                                    && keyStroke.getModifiers() == 0);
                             if (e.getKeyCode() == keyStroke.getKeyCode()
-                                    && (e.getModifiersEx() & keyStroke.getModifiers()) > 0
+                                    && modifiersMatch
                                     && e.getID() == KeyEvent.KEY_RELEASED) {
                                 Notification notification = createComponentUnderMouseNotification();
                                 sendNotification(notification);

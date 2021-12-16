@@ -30,7 +30,7 @@ public class SizeInfos implements Serializable {
         return new SizeInfos(
                 component.getSize(),
                 new SizeInfo(component.getMinimumSize(), component.isMinimumSizeSet()),
-                new SizeInfo(component.getMaximumSize(), component.isMinimumSizeSet()),
+                new SizeInfo(component.getMaximumSize(), component.isMaximumSizeSet()),
                 new SizeInfo(component.getPreferredSize(), component.isPreferredSizeSet()));
     }
 

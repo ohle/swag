@@ -59,6 +59,13 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
+    public Collection<ComponentProperty> getAllProperties(int hashCode) {
+        return Optional.ofNullable(taggedComponents.get(hashCode))
+                .map(ComponentProperty::collectForComponent)
+                .orElse(null);
+    }
+
+    @Override
     public int getParent(int hashCode) {
         Optional<Component> parent =
                 Optional.ofNullable(taggedComponents.get(hashCode)).map(Component::getParent);

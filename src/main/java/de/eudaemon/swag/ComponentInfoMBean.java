@@ -11,6 +11,8 @@ public interface ComponentInfoMBean extends NotificationEmitter {
 
     SizeInfos getSizeInfos(int hashCode);
 
+    Collection<ComponentProperty> getAllProperties(int hashCode);
+
     int getParent(int hashCode);
 
     Collection<Integer> getChildren(int hashCode);

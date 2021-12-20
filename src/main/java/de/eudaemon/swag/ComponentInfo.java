@@ -38,6 +38,14 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
+    public Collection<Integer> getRoots() {
+        return Arrays.stream(Window.getWindows())
+                .peek(this::tag)
+                .map(Objects::hashCode)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public ComponentDescription getDescription(int hashCode) {
         return Optional.ofNullable(taggedComponents.get(hashCode))
                 .map(ComponentDescription::forComponent)

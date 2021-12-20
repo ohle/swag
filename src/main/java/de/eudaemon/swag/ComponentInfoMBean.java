@@ -5,6 +5,8 @@ import java.util.Collection;
 import javax.management.NotificationEmitter;
 
 public interface ComponentInfoMBean extends NotificationEmitter {
+    Collection<Integer> getRoots();
+
     ComponentDescription getDescription(int hashCode);
 
     PlacementInfo getPlacementInfo(int hashCode);

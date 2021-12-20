@@ -7,6 +7,8 @@ import java.io.Serializable;
 
 import java.awt.Checkbox;
 import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Frame;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.ScrollPane;
@@ -72,6 +74,11 @@ public class ComponentDescription implements Serializable {
     }
 
     private static String findTextIfAny(Component component) {
+        if (component instanceof Frame) {
+            return ((Frame) component).getTitle();
+        } else if (component instanceof Dialog) {
+            return ((Dialog) component).getTitle();
+        }
         // There's no generic interface for a component that has a displayed text, but a lot
         // of component subtypes have a getText() method; so find and use it reflectively.
         try {

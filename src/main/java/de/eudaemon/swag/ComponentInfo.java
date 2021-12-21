@@ -137,11 +137,12 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
         Component component = taggedComponents.get(hashCode);
         return invokeInEDT(
                 () -> {
-                    BufferedImage image =
-                            new BufferedImage(
-                                    component.getWidth(),
-                                    component.getHeight(),
-                                    BufferedImage.TYPE_INT_RGB);
+                    int w = component.getWidth();
+                    int h = component.getHeight();
+                    if (w <= 0 || h <= 0) {
+                        return null;
+                    }
+                    BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
                     component.paint(image.createGraphics());
                     return new SerializableImage(image);
                 });

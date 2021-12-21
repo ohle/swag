@@ -1,5 +1,7 @@
 package de.eudaemon.swag;
 
+import java.lang.reflect.InvocationTargetException;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,11 +9,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import java.util.function.Supplier;
+
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.EventQueue;
 import java.awt.KeyboardFocusManager;
 import java.awt.MouseInfo;
 import java.awt.Point;
@@ -37,61 +44,89 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
         installHotkeyListener(keyStroke);
     }
 
+    private static <T> T invokeInEDT(Supplier<T> supplier) {
+        AtomicReference<T> ref = new AtomicReference<>();
+        try {
+            EventQueue.invokeAndWait(() -> ref.set(supplier.get()));
+            return ref.get();
+        } catch (InterruptedException | InvocationTargetException e_) {
+            System.err.println("Error retrieving data from event thread:");
+            e_.printStackTrace();
+            return null;
+        }
+    }
+
     @Override
     public Collection<Integer> getRoots() {
-        return Arrays.stream(Window.getWindows())
-                .peek(this::tag)
-                .map(Objects::hashCode)
-                .collect(Collectors.toSet());
+        return invokeInEDT(
+                () ->
+                        Arrays.stream(Window.getWindows())
+                                .peek(this::tag)
+                                .map(Objects::hashCode)
+                                .collect(Collectors.toSet()));
     }
 
     @Override
     public ComponentDescription getDescription(int hashCode) {
-        return Optional.ofNullable(taggedComponents.get(hashCode))
-                .map(ComponentDescription::forComponent)
-                .orElse(null);
+        return invokeInEDT(
+                () ->
+                        Optional.ofNullable(taggedComponents.get(hashCode))
+                                .map(ComponentDescription::forComponent)
+                                .orElse(null));
     }
 
     @Override
     public PlacementInfo getPlacementInfo(int hashCode) {
-        return Optional.ofNullable(taggedComponents.get(hashCode))
-                .flatMap(c -> Optional.ofNullable(additionTraces.get(c)))
-                .orElse(null);
+        return invokeInEDT(
+                () ->
+                        Optional.ofNullable(taggedComponents.get(hashCode))
+                                .flatMap(c -> Optional.ofNullable(additionTraces.get(c)))
+                                .orElse(null));
     }
 
     @Override
     public SizeInfos getSizeInfos(int hashCode) {
-        return Optional.ofNullable(taggedComponents.get(hashCode))
-                .map(SizeInfos::forComponent)
-                .orElse(null);
+        return invokeInEDT(
+                () ->
+                        Optional.ofNullable(taggedComponents.get(hashCode))
+                                .map(SizeInfos::forComponent)
+                                .orElse(null));
     }
 
     @Override
     public Collection<ComponentProperty> getAllProperties(int hashCode) {
-        return Optional.ofNullable(taggedComponents.get(hashCode))
-                .map(ComponentProperty::collectForComponent)
-                .orElse(null);
+        return invokeInEDT(
+                () ->
+                        Optional.ofNullable(taggedComponents.get(hashCode))
+                                .map(ComponentProperty::collectForComponent)
+                                .orElse(null));
     }
 
     @Override
     public int getParent(int hashCode) {
-        Optional<Component> parent =
-                Optional.ofNullable(taggedComponents.get(hashCode)).map(Component::getParent);
-        parent.ifPresent(this::tag);
-        return parent.map(Object::hashCode).orElse(-1);
+        return invokeInEDT(
+                () -> {
+                    Optional<Component> parent =
+                            Optional.ofNullable(taggedComponents.get(hashCode))
+                                    .map(Component::getParent);
+                    parent.ifPresent(this::tag);
+                    return parent.map(Object::hashCode).orElse(-1);
+                });
     }
 
     @Override
     public Collection<Integer> getChildren(int hashCode) {
-        return Optional.ofNullable(taggedComponents.get(hashCode))
-                .filter(Container.class::isInstance)
-                .map(Container.class::cast)
-                .map(Container::getComponents)
-                .map(Arrays::stream)
-                .orElse(Stream.of())
-                .peek(this::tag)
-                .map(Objects::hashCode)
-                .collect(Collectors.toList());
+        return invokeInEDT(
+                () ->
+                        Optional.ofNullable(taggedComponents.get(hashCode))
+                                .filter(Container.class::isInstance)
+                                .map(Container.class::cast)
+                                .map(Container::getComponents)
+                                .map(Arrays::stream)
+                                .orElse(Stream.of())
+                                .peek(this::tag)
+                                .map(Objects::hashCode)
+                                .collect(Collectors.toList()));
     }
 
     @Override
@@ -100,11 +135,16 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
             return null;
         }
         Component component = taggedComponents.get(hashCode);
-        BufferedImage image =
-                new BufferedImage(
-                        component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB);
-        component.paint(image.createGraphics());
-        return new SerializableImage(image);
+        return invokeInEDT(
+                () -> {
+                    BufferedImage image =
+                            new BufferedImage(
+                                    component.getWidth(),
+                                    component.getHeight(),
+                                    BufferedImage.TYPE_INT_RGB);
+                    component.paint(image.createGraphics());
+                    return new SerializableImage(image);
+                });
     }
 
     private void tag(Component component) {

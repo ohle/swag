@@ -7,6 +7,8 @@ import java.util.List;
 
 import java.util.function.Function;
 
+import java.util.stream.Collectors;
+
 import java.io.Serializable;
 
 import java.awt.Component;
@@ -26,6 +28,16 @@ public class ComponentProperty implements Serializable {
         category = category_;
         key = key_;
         valueDescription = valueDescription_;
+    }
+
+    public static class ListenerSet extends ComponentProperty {
+
+        public final Collection<String> classNames;
+
+        public ListenerSet(String key, Collection<Class<?>> classes_) {
+            super("Listeners", key, classes_.toString());
+            classNames = classes_.stream().map(Class::getName).collect(Collectors.toSet());
+        }
     }
 
     private static class ListBuilder<T extends Component> {
@@ -58,6 +70,16 @@ public class ComponentProperty implements Serializable {
                             category, name, Arrays.toString(accessor.apply(component))));
         }
 
+        public <L> ListBuilder<T> addListeners(String name, Function<T, ? extends L[]> accessor) {
+            list.add(
+                    new ListenerSet(
+                            name,
+                            Arrays.stream(accessor.apply(component))
+                                    .map(Object::getClass)
+                                    .collect(Collectors.toSet())));
+            return this;
+        }
+
         <NT extends Component> ListBuilder<NT> assumeType(Class<NT> clazz) {
             ListBuilder<NT> specialized = new ListBuilder<>(clazz.cast(component));
             specialized.list.addAll(list);
@@ -87,20 +109,20 @@ public class ComponentProperty implements Serializable {
         b.add("foreground", Component::getForeground);
         b.add("foregroundSet", Component::isForegroundSet);
 
-        b.category("Listeners");
-        b.addArray("componentListeners", Component::getComponentListeners);
-        b.addArray("hierarchyListeners", Component::getHierarchyListeners);
-        b.addArray("hierarchyBoundsListeners", Component::getHierarchyBoundsListeners);
-        b.addArray("keyListeners", Component::getKeyListeners);
-        b.addArray("mouseListeners", Component::getMouseListeners);
-        b.addArray("mouseMotionListeners", Component::getMouseMotionListeners);
-        b.addArray("propertyChangeListeners", Component::getPropertyChangeListeners);
+        b.addListeners("componentListeners", Component::getComponentListeners);
+        b.addListeners("hierarchyListeners", Component::getHierarchyListeners);
+        b.addListeners("hierarchyBoundsListeners", Component::getHierarchyBoundsListeners);
+        b.addListeners("keyListeners", Component::getKeyListeners);
+        b.addListeners("mouseListeners", Component::getMouseListeners);
+        b.addListeners("mouseMotionListeners", Component::getMouseMotionListeners);
+        b.addListeners("propertyChangeListeners", Component::getPropertyChangeListeners);
 
         b.category("Focus");
         b.add("focusOwner", Component::isFocusOwner);
         b.add("focusable", Component::isFocusable);
         b.add("focusTraversalKeysEnabled", Component::getFocusTraversalKeysEnabled);
         b.addArray("focusListeners", Component::getFocusListeners);
+        b.addListeners("focusListeners", Component::getFocusListeners);
 
         if (c instanceof JComponent) {
             ListBuilder<JComponent> jb = b.assumeType(JComponent.class);
@@ -111,9 +133,8 @@ public class ComponentProperty implements Serializable {
             jb.category("Focus");
             jb.add("requestFocusEnabled", JComponent::isRequestFocusEnabled);
 
-            jb.category("Listeners");
-            jb.addArray("vetoableChangeListeners", JComponent::getVetoableChangeListeners);
-            jb.addArray("ancestorListeners", JComponent::getAncestorListeners);
+            jb.addListeners("vetoableChangeListeners", JComponent::getVetoableChangeListeners);
+            jb.addListeners("ancestorListeners", JComponent::getAncestorListeners);
 
             b = jb;
         }
@@ -124,9 +145,7 @@ public class ComponentProperty implements Serializable {
             bb.add("action", AbstractButton::getAction);
             bb.add("model", AbstractButton::getModel);
             bb.addArray("actionListeners", AbstractButton::getActionListeners);
-
-            bb.category("Listeners");
-            bb.addArray("actionListeners", AbstractButton::getActionListeners);
+            bb.addListeners("actionListeners", AbstractButton::getActionListeners);
 
             bb.category("Appearance");
             bb.add("margin", AbstractButton::getMargin);
@@ -143,8 +162,7 @@ public class ComponentProperty implements Serializable {
             cb.addArray("components", Container::getComponents);
             cb.add("insets", Container::getInsets);
 
-            cb.category("Listeners");
-            cb.addArray("containerListeners", Container::getContainerListeners);
+            cb.addListeners("containerListeners", Container::getContainerListeners);
 
             cb.category("Focus");
             cb.add("focusCycleRoot", Container::isFocusCycleRoot);

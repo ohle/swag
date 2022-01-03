@@ -134,6 +134,7 @@ public class ComponentProperty implements Serializable {
             bb.add("horizontalAlignment", AbstractButton::getHorizontalAlignment);
             bb.add("verticalTextPosition", AbstractButton::getVerticalTextPosition);
             bb.add("horizontalTextPosition", AbstractButton::getHorizontalTextPosition);
+            b = bb;
         }
         if (c instanceof Container) {
             ListBuilder<Container> cb = b.assumeType(Container.class).category("Container");

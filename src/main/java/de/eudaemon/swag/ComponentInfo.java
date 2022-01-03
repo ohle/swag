@@ -115,6 +115,18 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
+    public int getRoot(int hashCode) {
+        return invokeInEDT(
+                () -> {
+                    Optional<Component> root =
+                            Optional.ofNullable(taggedComponents.get(hashCode))
+                                    .map(SwingUtilities::getRoot);
+                    root.ifPresent(this::tag);
+                    return root.map(Objects::hashCode).orElse(-1);
+                });
+    }
+
+    @Override
     public Collection<Integer> getChildren(int hashCode) {
         return invokeInEDT(
                 () ->
@@ -142,7 +154,7 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                     if (w <= 0 || h <= 0) {
                         return null;
                     }
-                    BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+                    BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
                     component.paint(image.createGraphics());
                     return new SerializableImage(image);
                 });

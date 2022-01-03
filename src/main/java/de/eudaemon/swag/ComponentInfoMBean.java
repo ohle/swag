@@ -17,6 +17,8 @@ public interface ComponentInfoMBean extends NotificationEmitter {
 
     int getParent(int hashCode);
 
+    int getRoot(int hashCode);
+
     Collection<Integer> getChildren(int hashCode);
 
     SerializableImage getSnapshot(int hashCode);

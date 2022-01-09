@@ -103,6 +103,23 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
     }
 
     @Override
+    public Collection<ChildBounds> getVisibleChildrenBounds(int hashCode) {
+        return invokeInEDT(
+                () -> {
+                    Component[] children =
+                            Optional.ofNullable(taggedComponents.get(hashCode))
+                                    .filter(Container.class::isInstance)
+                                    .map(Container.class::cast)
+                                    .map(Container::getComponents)
+                                    .orElse(new Component[] {});
+                    return Arrays.stream(children)
+                            .filter(Component::isVisible)
+                            .map(ChildBounds::fromComponent)
+                            .collect(Collectors.toList());
+                });
+    }
+
+    @Override
     public int getParent(int hashCode) {
         return invokeInEDT(
                 () -> {

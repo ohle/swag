@@ -15,6 +15,8 @@ public interface ComponentInfoMBean extends NotificationEmitter {
 
     Collection<ComponentProperty> getAllProperties(int hashCode);
 
+    Collection<ChildBounds> getVisibleChildrenBounds(int hashCode);
+
     int getParent(int hashCode);
 
     int getRoot(int hashCode);

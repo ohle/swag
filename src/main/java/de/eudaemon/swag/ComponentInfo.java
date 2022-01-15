@@ -114,6 +114,7 @@ public class ComponentInfo extends NotificationBroadcasterSupport implements Com
                                     .orElse(new Component[] {});
                     return Arrays.stream(children)
                             .filter(Component::isVisible)
+                            .peek(this::tag)
                             .map(ChildBounds::fromComponent)
                             .collect(Collectors.toList());
                 });

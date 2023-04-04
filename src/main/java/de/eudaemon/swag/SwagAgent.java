@@ -84,15 +84,17 @@ public class SwagAgent {
             int modifiers = 0;
 
             for (String option : options) {
-                String[] keyAndValue = option.split(":");
-                if ("agentJar".equals(keyAndValue[0])) {
-                    jarFile = new JarFile(keyAndValue[1]);
-                } else if ("keyCode".equals(keyAndValue[0])) {
-                    keyCode = Integer.parseInt(keyAndValue[1]);
-                } else if ("modifiers".equals(keyAndValue[0])) {
-                    modifiers = Integer.parseInt(keyAndValue[1]);
+                int separator = option.indexOf(':');
+                String key = option.substring(0, separator);
+                String value = option.substring(separator + 1);
+                if ("agentJar".equals(key)) {
+                    jarFile = new JarFile(value);
+                } else if ("keyCode".equals(key)) {
+                    keyCode = Integer.parseInt(value);
+                } else if ("modifiers".equals(key)) {
+                    modifiers = Integer.parseInt(value);
                 } else {
-                    throw new IllegalArgumentException("Unknown option: " + keyAndValue[0]);
+                    throw new IllegalArgumentException("Unknown option: " + key);
                 }
             }
             if (jarFile == null) {

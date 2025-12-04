@@ -55,7 +55,7 @@ public class SwagAgent {
                 .ignore(none())
                 .type(is(Container.class))
                 .transform(
-                        (builder, typeDescription, classLoader, module) ->
+                        (builder, typeDescription, classLoader, module, protectionDomain_) ->
                                 builder.visit(Advice.to(ToStringAdvice.class).on(named("addImpl"))))
                 .installOn(inst);
         inst.appendToBootstrapClassLoaderSearch(options.agentJar);

@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestApp" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="TestApp" />
+    <module name="swag" />
+    <option name="VM_PARAMETERS" value="-javaagent:target/swag-1.2.2-jar-with-dependencies.jar=agentJar:target/swag-1.2.2-jar-with-dependencies.jar" />
+    <extension name="de.eudaemon.ideaswag.SwingspectorExtension">
+      <Swingspector>
+        <keystroke code="59" modifiers="130" />
+        <active value="false" />
+        <timeout>5.0</timeout>
+      </Swingspector>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
